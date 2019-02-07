@@ -205,7 +205,7 @@ public:
   CNNChannelExtractor(const std::string& params_dir, bool use_only_first_layer = false)
     : subnet(params_dir, use_only_first_layer)
   {}
-  ~CNNChannelExtractor() {}
+  virtual ~CNNChannelExtractor() override {}
 
   int numChannels() const override { return conv_t2_size; }
 

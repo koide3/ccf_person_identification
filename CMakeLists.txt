@@ -12,8 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
 )
 
-# include($ENV{DLIB_ROOT}/dlib/cmake)
-include(/home/koide/libs/dlib/dlib/cmake)
+# set dlib directory to DLIB_ROOT
+include($ENV{DLIB_ROOT}/dlib/cmake)
 
 ###################################
 ## catkin specific configuration ##
@@ -43,8 +43,17 @@ add_dependencies(ccf_person_identification ccf_person_identification_EXPORTED_TA
 
 add_executable(ccf_person_identification_test src/ccf_person_identification_test.cpp)
 add_dependencies(ccf_person_identification_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(ccf_person_identification_test
+  ccf_person_identification
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  dlib::dlib
+)
+
+add_executable(cnn_test src/cnn_test.cpp)
+add_dependencies(cnn_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(cnn_test
   ccf_person_identification
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
