@@ -12,12 +12,15 @@
   <build_depend>roscpp</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>cv_bridge</build_depend>
+  <build_depend>open_face_recognition</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>roslib</build_export_depend>
   <build_export_depend>cv_bridge</build_export_depend>
+  <build_export_depend>open_face_recognition</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>roslib</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>open_face_recognition</exec_depend>
 
   <export>
   </export>

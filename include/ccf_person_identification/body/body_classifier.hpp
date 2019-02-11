@@ -10,6 +10,7 @@
 #include <kkl/cvk/icf_channel_bank.hpp>
 
 #include <ccf_person_identification/online_classifier.hpp>
+#include <ccf_person_identification/body/body_features.hpp>
 #include <ccf_person_identification/body/body_weak_classifier.hpp>
 #include <ccf_person_identification/body/cnn_channel_extractor.hpp>
 
@@ -17,8 +18,10 @@
 namespace ccf_person_classifier {
 
 
-class BodyClassifier : public OnlineClassifier {
+class BodyClassifier : public virtual OnlineClassifier {
 public:
+    using Ptr = std::shared_ptr<BodyClassifier>;
+
     BodyClassifier(ros::NodeHandle& nh)
         : num_positives(0),
           num_negatives(0)
@@ -60,14 +63,32 @@ public:
     }
     virtual ~BodyClassifier() override {}
 
-    virtual bool extractFeatures(Features::Ptr& features_, const cv::Mat& bgr_image, const cv::Mat& gray_image) override {
-        BodyFeatures::Ptr features = std::dynamic_pointer_cast<BodyFeatures>(features_);
-        if(!features) {
+
+    virtual std::string name() const override {
+        return "body";
+    }
+
+    virtual bool extractInput(Input::Ptr& input_, const cv::Mat& bgr_image) override {
+        BodyInput::Ptr input = std::dynamic_pointer_cast<BodyInput>(input_);
+        if(!input) {
             return false;
         }
 
-        features->color = bgr_image;
-        features->feature_maps = channel_bank->extract(bgr_image, gray_image);
+        input->bgr_image = bgr_image.clone();
+        cv::cvtColor(bgr_image, input->gray_image, cv::COLOR_BGR2GRAY);
+
+        return true;
+    }
+
+    virtual bool extractFeatures(Features::Ptr& features_, const Input::Ptr& input_) override {
+        BodyInput::Ptr input = std::dynamic_pointer_cast<BodyInput>(input_);
+        BodyFeatures::Ptr features = std::dynamic_pointer_cast<BodyFeatures>(features_);
+        if(!input || !features) {
+            return false;
+        }
+
+        features->color = input->bgr_image;
+        features->feature_maps = channel_bank->extract(input->bgr_image, input->gray_image);
         features->integral_maps.resize(features->feature_maps.size());
         for(size_t i=0; i<features->feature_maps.size(); i++) {
           cv::integral(features->feature_maps[i], features->integral_maps[i]);

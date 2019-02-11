@@ -9,7 +9,16 @@
 
 namespace ccf_person_classifier {
 
-class BodyFeatures : public Features {
+class BodyInput : public virtual Input {
+public:
+    virtual ~BodyInput() override {}
+    using Ptr = std::shared_ptr<BodyInput>;
+
+    cv::Mat bgr_image;
+    cv::Mat gray_image;
+};
+
+class BodyFeatures : public virtual Features {
 public:
     virtual ~BodyFeatures() override {}
     using Ptr = std::shared_ptr<BodyFeatures>;

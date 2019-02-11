@@ -3,7 +3,7 @@
 
 #include <boost/format.hpp>
 #include <opencv2/opencv.hpp>
-#include <ccf_person_identification/body/body_classifier.hpp>
+#include <ccf_person_identification/person_classifier.hpp>
 
 
 using namespace ccf_person_classifier;
@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
-    std::unique_ptr<BodyClassifier> classifier(new BodyClassifier(private_nh));
+    std::unique_ptr<PersonClassifier> classifier(new PersonClassifier(private_nh));
 
     std::string package_path = ros::package::getPath("ccf_person_identification");
     std::string dataset_dir = package_path + "/data/test";
@@ -30,16 +30,6 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        cv::Mat pos_gray;
-        cv::cvtColor(pos, pos_gray, cv::COLOR_BGR2GRAY);
-
-        cv::Mat neg1_gray;
-        cv::cvtColor(neg1, neg1_gray, cv::COLOR_BGR2GRAY);
-
-        cv::Mat neg2_gray;
-        cv::cvtColor(neg2, neg2_gray, cv::COLOR_BGR2GRAY);
-
-
         cv::Mat pos_result;
         cv::resize(pos, pos_result, cv::Size(128, 256));
 
@@ -49,18 +39,23 @@ int main(int argc, char** argv) {
         cv::Mat neg2_result = neg2.clone();
         cv::resize(neg2, neg2_result, cv::Size(128, 256));
 
-        Features::Ptr features(new BodyFeatures());
-        classifier->extractFeatures(features, pos, pos_gray);
+        Input::Ptr input(new PersonInput());
+        Features::Ptr features(new PersonFeatures());
+
+        classifier->extractInput(input, pos);
+        classifier->extractFeatures(features, input);
         cv::Scalar pos_color = *classifier->predict(features) > 0.0 ? cv::Scalar(0, 0, 255) : cv::Scalar(255, 0, 0);
         cv::rectangle(pos_result, cv::Point(0, 0), cv::Point(128, 256), pos_color, 5);
 
         ROS_INFO_STREAM("pos:" << *classifier->predict(features));
 
-        classifier->extractFeatures(features, neg1, neg1_gray);
+        classifier->extractInput(input, neg1);
+        classifier->extractFeatures(features, input);
         cv::Scalar neg1_color = *classifier->predict(features) > 0.0 ? cv::Scalar(0, 0, 255) : cv::Scalar(255, 0, 0);
         cv::rectangle(neg1_result, cv::Point(0, 0), cv::Point(128, 256), neg1_color, 5);
 
-        classifier->extractFeatures(features, neg2, neg2_gray);
+        classifier->extractInput(input, neg2);
+        classifier->extractFeatures(features, input);
         cv::Scalar neg2_color = *classifier->predict(features) > 0.0 ? cv::Scalar(0, 0, 255) : cv::Scalar(255, 0, 0);
         cv::rectangle(neg2_result, cv::Point(0, 0), cv::Point(128, 256), neg2_color, 5);
 
@@ -71,20 +66,26 @@ int main(int argc, char** argv) {
         cv::putText(canvas, i <= 10 ? "training" : "testing", cv::Point(10, 25), CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(255));
         cv::imshow("results", canvas);
 
-        cv::Mat feature_map = classifier->visualize();
-        if(feature_map.data) {
-            cv::imshow("feature_map", feature_map);
+        BodyClassifier::Ptr body_classifier = classifier->getClassifier<BodyClassifier>("body");
+        if(body_classifier) {
+            cv::Mat feature_map = body_classifier->visualize();
+            if(feature_map.data) {
+                cv::imshow("feature_map", feature_map);
+            }
         }
         cv::waitKey(0);
 
         if(i <= 10)  {
-            classifier->extractFeatures(features, pos, pos_gray);
+            classifier->extractInput(input, pos);
+            classifier->extractFeatures(features, input);
             classifier->update(1.0, features);
 
-            classifier->extractFeatures(features, neg1, neg1_gray);
+            classifier->extractInput(input, neg1);
+            classifier->extractFeatures(features, input);
             classifier->update(-1.0, features);
 
-            classifier->extractFeatures(features, neg2, neg2_gray);
+            classifier->extractInput(input, neg2);
+            classifier->extractFeatures(features, input);
             classifier->update(-1.0, features);
         }
     }

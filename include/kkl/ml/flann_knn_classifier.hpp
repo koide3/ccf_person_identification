@@ -6,6 +6,8 @@
 #ifndef KKL_FLANN_KNN_CLASSIFIER_HPP
 #define KKL_FLANN_KNN_CLASSIFIER_HPP
 
+#undef USE_UNORDERED_MAP
+
 #include <deque>
 #include <vector>
 #include <memory>

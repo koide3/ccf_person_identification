@@ -2,14 +2,17 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ccf_person_identification)
 
 add_compile_options(-std=c++11)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Flann REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   roslib
   cv_bridge
+  open_face_recognition
 )
 
 # set dlib directory to DLIB_ROOT
@@ -32,6 +35,7 @@ catkin_package(
 include_directories(
   include
   ${EIGEN3_INCLUDE_DIRS}
+  ${FLANN_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -47,6 +51,7 @@ target_link_libraries(ccf_person_identification_test
   ccf_person_identification
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  ${FLANN_LIBRARIES}
   dlib::dlib
 )
 
@@ -57,5 +62,6 @@ target_link_libraries(cnn_test
   ccf_person_identification
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  ${FLANN_LIBRARIES}
   dlib::dlib
 )
