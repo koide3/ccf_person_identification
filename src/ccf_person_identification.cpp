@@ -1,3 +1,2 @@
 #include <iostream>
 
-void hello() {}

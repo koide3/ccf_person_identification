@@ -23,7 +23,7 @@ include($ENV{DLIB_ROOT}/dlib/cmake)
 ###################################
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES ccf_person_identification
+  LIBRARIES ccf_person_identification
 #  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
@@ -42,17 +42,18 @@ include_directories(
 add_library(ccf_person_identification
   src/ccf_person_identification.cpp
 )
-
+target_link_libraries(ccf_person_identification
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ${FLANN_LIBRARIES}
+  dlib::dlib
+)
 add_dependencies(ccf_person_identification ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(ccf_person_identification_test src/ccf_person_identification_test.cpp)
 add_dependencies(ccf_person_identification_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ccf_person_identification_test
   ccf_person_identification
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-  ${FLANN_LIBRARIES}
-  dlib::dlib
 )
 
 add_executable(cnn_test src/cnn_test.cpp)
@@ -60,8 +61,4 @@ add_dependencies(cnn_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin
 
 target_link_libraries(cnn_test
   ccf_person_identification
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-  ${FLANN_LIBRARIES}
-  dlib::dlib
 )

@@ -31,7 +31,7 @@ public:
         return "face";
     }
 
-    virtual bool update(double label, const Features::Ptr& features_) {
+    virtual bool update(double label, const Features::Ptr& features_) override {
         FaceFeatures::Ptr features = std::dynamic_pointer_cast<FaceFeatures>(features_);
         if(!features) {
             return false;
@@ -49,6 +49,8 @@ public:
         if((pred > 0.0) != (label > 0.0) || std::abs(pred) < 0.6 || min_dist > 0.2) {
             classifier->addPoint(label, features->face_features);
         }
+
+        return true;
     }
 
     virtual boost::optional<double> predict(const Features::Ptr& features_) override {

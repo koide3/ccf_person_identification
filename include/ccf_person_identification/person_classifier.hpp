@@ -1,6 +1,7 @@
 #ifndef PERSON_CLASSIFIER_HPP
 #define PERSON_CLASSIFIER_HPP
 
+#include <vector>
 #include <ccf_person_identification/online_classifier.hpp>
 #include <ccf_person_identification/face/face_classifier.hpp>
 #include <ccf_person_identification/body/body_classifier.hpp>

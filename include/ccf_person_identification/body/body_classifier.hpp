@@ -104,8 +104,6 @@ public:
             return false;
         }
 
-        ROS_INFO("add sample to body classifier");
-
         if(label > 0.0) {
           num_positives ++;
           last_target = features;
@@ -123,7 +121,7 @@ public:
             return false;
         }
 
-        return boosting->predict(features);
+        return boosting->predictReal(features);
     }
 
 
