@@ -30,6 +30,12 @@ int main(int argc, char** argv) {
             return 1;
         }
 
+        if(i <= 10) {
+            ROS_INFO_STREAM("training");
+        } else {
+            ROS_INFO_STREAM("testing");            
+        }
+
         cv::Mat pos_result;
         cv::resize(pos, pos_result, cv::Size(128, 256));
 
@@ -54,10 +60,14 @@ int main(int argc, char** argv) {
         cv::Scalar neg1_color = *classifier->predict(features) > 0.0 ? cv::Scalar(0, 0, 255) : cv::Scalar(255, 0, 0);
         cv::rectangle(neg1_result, cv::Point(0, 0), cv::Point(128, 256), neg1_color, 5);
 
+        ROS_INFO_STREAM("neg1:" << *classifier->predict(features));
+
         classifier->extractInput(input, neg2);
         classifier->extractFeatures(features, input);
         cv::Scalar neg2_color = *classifier->predict(features) > 0.0 ? cv::Scalar(0, 0, 255) : cv::Scalar(255, 0, 0);
         cv::rectangle(neg2_result, cv::Point(0, 0), cv::Point(128, 256), neg2_color, 5);
+
+        ROS_INFO_STREAM("neg2:" << *classifier->predict(features));
 
         std::vector<cv::Mat> results = {pos_result, neg1_result, neg2_result};
         cv::Mat canvas;
