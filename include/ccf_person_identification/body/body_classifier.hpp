@@ -68,7 +68,13 @@ public:
         return "body";
     }
 
-    virtual bool extractInput(Input::Ptr& input_, const cv::Mat& bgr_image) override {
+    virtual bool extractInput(Input::Ptr& input_, const std::unordered_map<std::string, cv::Mat>& images) override {
+        auto found = images.find("body");
+        if(found == images.end()) {
+            return false;
+        }
+        const auto& bgr_image = found->second;
+
         BodyInput::Ptr input = std::dynamic_pointer_cast<BodyInput>(input_);
         if(!input) {
             return false;

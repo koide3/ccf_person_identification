@@ -38,6 +38,14 @@ public:
     }
 
     /**
+     * @brief if the classifier is ready
+     * @return if the classifier is ready
+     */
+    bool ready() const {
+        return index != nullptr;
+    }
+
+    /**
      * @brief add a point to the classifier
      * @param label  label
      * @param point  feature vector

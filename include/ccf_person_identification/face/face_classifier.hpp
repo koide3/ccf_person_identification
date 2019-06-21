@@ -16,13 +16,20 @@ public:
     using Ptr = std::shared_ptr<FaceClassifier>;
 
     FaceClassifier(ros::NodeHandle& nh)
-        : face_detector(dlib::get_frontal_face_detector()),
-          client(nh.serviceClient<open_face_recognition::CalcImageFeatures>("/calc_image_features"))
+        : face_detector(dlib::get_frontal_face_detector())
     {
         knn_k = 5;
         num_positives = 0;
         num_negatives = 0;
         classifier.reset(new kkl::ml::FlannKNNClassifier<float>());
+
+
+        ROS_INFO_STREAM("wait for calc_images_features");
+        if(!ros::service::waitForService("/calc_image_features", ros::Duration(15.0))) {
+            ROS_ERROR_STREAM("calc_image_features service not available!!!!");
+        }
+        ROS_INFO_STREAM("calc_images_features ready");
+        client = nh.serviceClient<open_face_recognition::CalcImageFeatures>("/calc_image_features");
     }
 
     virtual ~FaceClassifier() override {}
@@ -33,7 +40,7 @@ public:
 
     virtual bool update(double label, const Features::Ptr& features_) override {
         FaceFeatures::Ptr features = std::dynamic_pointer_cast<FaceFeatures>(features_);
-        if(!features) {
+        if(!features || features->face_features.size() < 5) {
             return false;
         }
 
@@ -55,45 +62,35 @@ public:
 
     virtual boost::optional<double> predict(const Features::Ptr& features_) override {
         FaceFeatures::Ptr features = std::dynamic_pointer_cast<FaceFeatures>(features_);
-        if(!features) {
+        if(!classifier->ready() || !features || features->face_features.size() < 5) {
             return boost::none;
         }
 
-        return classifier->predictBinaryReal(features->face_features, knn_k);
+        double pred = classifier->predictBinaryReal(features->face_features, knn_k);
+
+        return pred;
     }
 
-    virtual bool extractInput(Input::Ptr& input_, const cv::Mat& bgr_image) override {
+    virtual bool extractInput(Input::Ptr& input_, const std::unordered_map<std::string, cv::Mat>& images) override {
+        auto found = images.find("face");
+        if(found == images.end() || !found->second.data) {
+            return false;
+        }
+        const cv::Mat& face_image = found->second;
+
         FaceInput::Ptr input = std::dynamic_pointer_cast<FaceInput>(input_);
         if(!input) {
             return false;
         }
 
-        double face_roi_height = 0.33;
-        double face_roi_width = 0.8;
-        input->face_roi = cv::Rect(bgr_image.cols * (1 - face_roi_width) / 2, 0, bgr_image.cols * face_roi_width, bgr_image.rows * face_roi_height);
-
-        cv::Mat face_roi_gray;
-        cv::cvtColor(cv::Mat(bgr_image, input->face_roi), face_roi_gray, cv::COLOR_BGR2GRAY);
-
-        dlib::cv_image<uchar> dgray(face_roi_gray);
-        std::vector<dlib::rect_detection> faces;
-        face_detector(dgray, faces);
-
-        if(faces.empty()) {
-            return false;
-        }
-
-        auto largest = std::max_element(faces.begin(), faces.end(), [=](const dlib::rect_detection& lhs, const dlib::rect_detection& rhs) { return lhs.rect.area() < rhs.rect.area(); });
-        input->face_region = cv::Rect(largest->rect.left(), largest->rect.top(), largest->rect.width(), largest->rect.height());
-        input->face_image = cv::Mat(bgr_image, *input->face_region);
-
+        input->face_image = face_image.clone();
         return true;
     }
 
     virtual bool extractFeatures(Features::Ptr& features_, const Input::Ptr& input_) override {
         FaceInput::Ptr input = std::dynamic_pointer_cast<FaceInput>(input_);
         FaceFeatures::Ptr features = std::dynamic_pointer_cast<FaceFeatures>(features_);
-        if(!input || !features) {
+        if(!input || !features || !input->face_image.data) {
             return false;
         }
 

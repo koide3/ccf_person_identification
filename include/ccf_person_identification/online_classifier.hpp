@@ -2,6 +2,7 @@
 #define ONLINE_CLASSIFIER_HPP
 
 #include <memory>
+#include <unordered_map>
 #include <boost/optional.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -57,7 +58,7 @@ public:
      * @param bgr_image
      * @return
      */
-    virtual bool extractInput(Input::Ptr& input, const cv::Mat& bgr_image) = 0;
+    virtual bool extractInput(Input::Ptr& input, const std::unordered_map<std::string, cv::Mat>& images) = 0;
 
     /**
      * @brief extract features from input data

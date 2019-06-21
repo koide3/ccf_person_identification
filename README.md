@@ -4,7 +4,7 @@ This package is an implementation of person identification based on the combinat
 
 ## Example
 
-Test images can be found in ***"ccf_person_identification/data/test"***.
+Test images can be found in *"ccf_person_identification/data/test"*.
 
 ```bash
 rosrun ccf_person_identification ccf_person_identification_test

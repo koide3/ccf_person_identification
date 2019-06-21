@@ -11,8 +11,6 @@ public:
     virtual ~FaceInput() {}
     using Ptr = std::shared_ptr<FaceInput>;
 
-    cv::Rect face_roi;
-    boost::optional<cv::Rect> face_region;
     cv::Mat face_image;
 };
 
