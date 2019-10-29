@@ -50,11 +50,11 @@ target_link_libraries(ccf_person_identification
 )
 add_dependencies(ccf_person_identification ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-# add_executable(ccf_person_identification_test src/ccf_person_identification_test.cpp)
-# add_dependencies(ccf_person_identification_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(ccf_person_identification_test
-#   ccf_person_identification
-# )
+add_executable(ccf_person_identification_test src/ccf_person_identification_test.cpp)
+add_dependencies(ccf_person_identification_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ccf_person_identification_test
+  ccf_person_identification
+)
 #
 # add_executable(cnn_test src/cnn_test.cpp)
 # add_dependencies(cnn_test ${ccf_person_identification_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

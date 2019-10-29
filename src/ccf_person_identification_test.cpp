@@ -14,18 +14,20 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
-    std::unique_ptr<PersonClassifier> classifier(new PersonClassifier(private_nh));
+    std::unique_ptr<BodyClassifier> classifier(new BodyClassifier(private_nh));
 
     std::string package_path = ros::package::getPath("ccf_person_identification");
     std::string dataset_dir = package_path + "/data/test";
 
     // train the classifier with the first ten frames, and test it with the rest frames
     for(int i=1; i<=14; i++) {
-        cv::Mat pos = cv::imread((boost::format("%s/p%02d.jpg") % dataset_dir % i).str());
-        cv::Mat neg1 = cv::imread((boost::format("%s/n%02d-01.jpg") % dataset_dir % i).str());
-        cv::Mat neg2 = cv::imread((boost::format("%s/n%02d-02.jpg") % dataset_dir % i).str());
+        std::unordered_map<std::string, cv::Mat> pos, neg1, neg2;
 
-        if(!pos.data || !neg1.data || !neg2.data) {
+        pos["body"] = cv::imread((boost::format("%s/p%02d.jpg") % dataset_dir % i).str());
+        neg1["body"] = cv::imread((boost::format("%s/n%02d-01.jpg") % dataset_dir % i).str());
+        neg2["body"] = cv::imread((boost::format("%s/n%02d-02.jpg") % dataset_dir % i).str());
+
+        if(!pos["body"].data || !neg1["body"].data || !neg2["body"].data) {
             std::cerr << "error : failed to open image!! image_id: " << i << std::endl;
             return 1;
         }
@@ -33,17 +35,17 @@ int main(int argc, char** argv) {
         if(i <= 10) {
             ROS_INFO_STREAM("training");
         } else {
-            ROS_INFO_STREAM("testing");            
+            ROS_INFO_STREAM("testing");
         }
 
         cv::Mat pos_result;
-        cv::resize(pos, pos_result, cv::Size(128, 256));
+        cv::resize(pos["body"], pos_result, cv::Size(128, 256));
 
         cv::Mat neg1_result;
-        cv::resize(neg1, neg1_result, cv::Size(128, 256));
+        cv::resize(neg1["body"], neg1_result, cv::Size(128, 256));
 
-        cv::Mat neg2_result = neg2.clone();
-        cv::resize(neg2, neg2_result, cv::Size(128, 256));
+        cv::Mat neg2_result;
+        cv::resize(neg2["body"], neg2_result, cv::Size(128, 256));
 
         Input::Ptr input(new PersonInput());
         Features::Ptr features(new PersonFeatures());
@@ -76,12 +78,9 @@ int main(int argc, char** argv) {
         cv::putText(canvas, i <= 10 ? "training" : "testing", cv::Point(10, 25), CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(255));
         cv::imshow("results", canvas);
 
-        BodyClassifier::Ptr body_classifier = classifier->getClassifier<BodyClassifier>("body");
-        if(body_classifier) {
-            cv::Mat feature_map = body_classifier->visualize();
-            if(feature_map.data) {
-                cv::imshow("feature_map", feature_map);
-            }
+        cv::Mat feature_map = classifier->visualize();
+        if(feature_map.data) {
+            cv::imshow("feature_map", feature_map);
         }
         cv::waitKey(0);
 
