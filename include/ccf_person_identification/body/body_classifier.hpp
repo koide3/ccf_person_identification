@@ -191,7 +191,7 @@ public:
           cv::resize(feat, feat, cv::Size(map_size.width, map_size.height));
 
           cv::addWeighted(jet, 0.5, feat, 0.5, 0.0, roi);
-          cv::putText(roi, channel_names[i], cv::Point(4, 10), CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(255));
+          cv::putText(roi, channel_names[i], cv::Point(4, 10), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(255));
         }
 
         return canvas;
