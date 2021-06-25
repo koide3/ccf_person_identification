@@ -74,8 +74,8 @@ int main(int argc, char** argv) {
         std::vector<cv::Mat> results = {pos_result, neg1_result, neg2_result};
         cv::Mat canvas;
         cv::hconcat(results, canvas);
-        cv::putText(canvas, i <= 10 ? "training" : "testing", cv::Point(10, 25), CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2);
-        cv::putText(canvas, i <= 10 ? "training" : "testing", cv::Point(10, 25), CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(255));
+        cv::putText(canvas, i <= 10 ? "training" : "testing", cv::Point(10, 25), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2);
+        cv::putText(canvas, i <= 10 ? "training" : "testing", cv::Point(10, 25), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(255));
         cv::imshow("results", canvas);
 
         cv::Mat feature_map = classifier->visualize();

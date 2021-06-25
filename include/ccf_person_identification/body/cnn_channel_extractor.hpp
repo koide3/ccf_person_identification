@@ -158,8 +158,9 @@ public:
    * @return extracted features
    */
   std::vector<cv::Mat> forward (const cv::Mat& rgb_image) {
+    dlib::cv_image<dlib::rgb_pixel> dlib_image(rgb_image);
     dlib::matrix<dlib::rgb_pixel> input;
-    dlib::assign_image(input, dlib::cv_image<dlib::rgb_pixel>(rgb_image));
+    dlib::assign_image(input, dlib_image);
 
     dlib::resizable_tensor output = net(input);
     if(use_only_first_layer) {
